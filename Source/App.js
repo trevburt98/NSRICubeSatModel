@@ -9,60 +9,36 @@
         baseLayerPicker : false
     });
 
-    var tle1 = "1 25544U 98067A   19340.65162351 -.00000206  00000-0  44295-5 0  9994";
-    var tle2 = "2 25544  51.6436 226.2718 0006901   6.3372  31.6165 15.50090093202011";
-
-    var date = new Date("20" + tle1.substring(18,20), 0);
-    date.setDate(tle1.substring(20, 23));
-    date.setSeconds(86400 * tle1.substring(23,33));
-
-    var jDate = Cesium.JulianDate.fromDate(date);
-
-    console.log(jDate);
+    var tle1 = "1 25544U 98067A   19342.09024265  .00000091  00000-0  96231-5 0  9993";
+    var tle2 = "2 25544  51.6438 219.1426 0007087  12.2210 139.0043 15.50092410202230";
 
     var satrec = satellite.twoline2satrec(tle1, tle2);
+    var jDate = new Cesium.JulianDate(satrec.jdsatepoch);
+    console.log(Cesium.JulianDate.toDate(jDate));
 
-    console.log(satrec);
-
-    var currentMinutes = 0;
+    var currentSeconds = 0;
     var gmst = satellite.gstime(new Date());
     var positionArray = new Array();
 
     //Propogate our satellite out for 1 day getting point for every 5 minutes
-    while(currentMinutes < 86400) {
-        var positionAndVelocity = satellite.sgp4(satrec, currentMinutes);
+    while(currentSeconds <= 86400) {
+        var positionAndVelocity = satellite.sgp4(satrec, (currentSeconds / 60));
         var positionEci = positionAndVelocity.position;
         var positionGd = satellite.eciToGeodetic(positionEci, gmst);
-        var longitude = positionGd.longitude,
-            latitude = positionGd.latitude;
-
-        var longitudeStr = satellite.degreesLong(longitude);
-        var latitudeStr = satellite.degreesLat(latitude);
 
         var cartesianCoords = Cesium.Cartesian3.fromRadians(positionGd.longitude, positionGd.latitude, positionGd.height);
 
-        //console.log("Latitude: " + latitudeStr + ", Longitude: " + longitudeStr);
-
-        positionArray.push(currentMinutes, cartesianCoords.x, cartesianCoords.y, cartesianCoords.z);
-        currentMinutes += 300;      
+        positionArray.push(currentSeconds, cartesianCoords.x, cartesianCoords.y, cartesianCoords.z);
+        currentSeconds += 300;      
     }
     
     //console.log(positionArray);
-    //var date = Cesium.JulianDate.fromDate(new Date(Date.now()));
-    // console.log(date);
     
 
     var positionProperty = new Cesium.SampledPositionProperty();
     positionProperty.addSamplesPackedArray(positionArray, jDate);
     positionProperty.setInterpolationOptions({interpolationAlgorithm: Cesium.LagrangePolynomialApproximation, interpolationDegree: 5});
     //console.log(positionProperty);
-
-
-    // var testTime = new Date(date);
-    // testTime.setHours(testTime.getHours() + 1);
-    // console.log(testTime);
-
-    // console.log(positionProperty.getValue(Cesium.JulianDate.fromDate(testTime)));
 
     var newSatellite = viewer.entities.add({
         name: "Our Cubesat",
@@ -99,21 +75,4 @@
             height: 20
         }
     });
-
-    console.log(newSatellite);
-
-    //viewer.zoomTo(baseStation);
-
-    //console.log(newSatellite);
-
-    // var satellitePromise = Cesium.CzmlDataSource.load("./Source/SampleData/sampleOrbit.czml");
-
-    //  satellitePromise.then(function(dataSource) {
-    //     viewer.dataSources.add(dataSource);
-    //     var satelliteEntities = dataSource.entities.values;
-         
-    //     var entity = satelliteEntities[0];
-
-    //     console.log(entity.);
-    //  });
 }());
