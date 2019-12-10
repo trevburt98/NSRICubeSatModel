@@ -9,16 +9,18 @@
         baseLayerPicker : false
     });
 
-    var tle1 = "1 25544U 98067A   19342.09024265  .00000091  00000-0  96231-5 0  9993";
-    var tle2 = "2 25544  51.6438 219.1426 0007087  12.2210 139.0043 15.50092410202230";
+    var tle1 = "1 25544U 98067A   19343.93540573  .00002347  00000-0  48942-4 0  9993";
+    var tle2 = "2 25544  51.6436 210.0008 0007259  17.8266 356.8918 15.50107634202524";
 
     var satrec = satellite.twoline2satrec(tle1, tle2);
     var jDate = new Cesium.JulianDate(satrec.jdsatepoch);
-    console.log(Cesium.JulianDate.toDate(jDate));
+    //console.log(Cesium.JulianDate.toDate(jDate));
 
     var currentSeconds = 0;
     var gmst = satellite.gstime(new Date());
     var positionArray = new Array();
+    var originalLong;
+    var orbitTime = 0;
 
     //Propogate our satellite out for 1 day getting point for every 5 minutes
     while(currentSeconds <= 86400) {
@@ -27,6 +29,13 @@
         var positionGd = satellite.eciToGeodetic(positionEci, gmst);
 
         var cartesianCoords = Cesium.Cartesian3.fromRadians(positionGd.longitude, positionGd.latitude, positionGd.height);
+
+        if(currentSeconds == 0) {
+            originalLong = positionGd.longitude
+        } else if(positionGd.longitude - 0.11 < originalLong && originalLong < positionGd.longitude + 0.1 && orbitTime == 0) {
+            orbitTime = currentSeconds;
+            console.log(orbitTime);
+        }
 
         positionArray.push(currentSeconds, cartesianCoords.x, cartesianCoords.y, cartesianCoords.z);
         currentSeconds += 300;      
@@ -55,7 +64,15 @@
             verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
             pixelOffset: new Cesium.Cartesian2(0, -12)
         },
-        position: positionProperty
+        position: positionProperty,
+        path: {
+            show: true,
+            width: 2,
+            material: new Cesium.ColorMaterialProperty(Cesium.Color.GREEN),
+            resolution: 120,
+            leadTime: orbitTime/2,
+            trailTime: orbitTime/2
+        }
     });
 
     var baseStation = viewer.entities.add({
