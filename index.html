@@ -12,6 +12,16 @@
     </head>
     <body>
         <div id="cesiumContainer"></div>
+        <div class="backdrop" id="menu">
+                <div class="nowrap">
+                        <input id="freeView" name="source" type="radio" checked/>
+                        <label for="freeView">Free View</label>
+                    </div>
+            <div class="nowrap">
+                <input id="satelliteView" name="source" type="radio"/>
+                <label for="satelliteView">Satellite View</label>
+            </div>
+        </div>
         <script src="Source/App.js"></script>
     </body>
 </html>
