@@ -9,8 +9,8 @@
         baseLayerPicker : false
     });
 
-    var tle1 = "1 25544U 98067A   19345.90010417  .00003601  00000-0  70741-4 0  9997";
-    var tle2 = "2 25544  51.6441 200.2644 0007302  25.9136 159.9168 15.50127197202820";
+    var tle1 = "1 25544U 98067A   19346.21805159  .00000835  00000-0  22580-4 0  9991";
+    var tle2 = "2 25544  51.6435 198.6938 0007410  26.5038 134.7686 15.50120630202873";
 
     var satrec = satellite.twoline2satrec(tle1, tle2);
     //console.log(satrec);
@@ -25,13 +25,13 @@
     var orbitTime = 0;
 
     //Propogate our satellite out for 1 day getting point for every 5 minutes
-    while(currentSeconds <= 86400) {
+    while(currentSeconds <= 129600) {
         var positionAndVelocity = satellite.sgp4(satrec, (currentSeconds / 60));
         var positionEci = positionAndVelocity.position;
         var positionGd = satellite.eciToGeodetic(positionEci, gmst);
         //console.log(positionGd);
 
-        var cartesianCoords = Cesium.Cartesian3.fromRadians(positionGd.longitude, positionGd.latitude, positionGd.height);
+        var cartesianCoords = Cesium.Cartesian3.fromRadians(positionGd.longitude, positionGd.latitude, positionGd.height*1000);
         var sensorCoords = Cesium.Cartesian3.fromRadians(positionGd.longitude, positionGd.latitude, 0);
 
         if(currentSeconds == 0) {
@@ -43,7 +43,7 @@
 
         positionArray.push(currentSeconds, cartesianCoords.x, cartesianCoords.y, cartesianCoords.z);
         sensorArray.push(currentSeconds, sensorCoords.x, sensorCoords.y, sensorCoords.z);
-        currentSeconds += 300;      
+        currentSeconds += 300;
     }
     
     //console.log(positionArray);
@@ -77,7 +77,7 @@
         position: positionProperty,
         path: {
             show: true,
-            width: 2,
+            width: 1.5,
             material: new Cesium.ColorMaterialProperty(Cesium.Color.WHITE),
             resolution: 120,
             leadTime: orbitTime/2,
@@ -107,7 +107,7 @@
     var sensorBox = new Cesium.BoxGraphics();
     sensorBox.material = new Cesium.ColorMaterialProperty(new Cesium.Color(0.921875, 0.60546875, 0.0546875, .3));
     sensorBox.outline = true;
-    sensorBox.dimensions = new Cesium.Cartesian3(80, 80, 0);
+    sensorBox.dimensions = new Cesium.Cartesian3(72000, 72000, 0);
 
     var sensorView = viewer.entities.add({
         position: sensorPositionProperty,
