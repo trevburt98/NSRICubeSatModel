@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "compression": "^1.6.2",
-    "express": "^4.15",
+    "express": "^4.17",
     "jquery": "^3.4.1",
     "request": "^2.79.0",
     "satellite.js": "^3.0.1",
